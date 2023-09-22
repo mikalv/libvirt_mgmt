@@ -1,0 +1,97 @@
+#cloud-config
+
+ssh_authorized_keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC8WuedPAhxZ4Dv3uo8rcQnSBg7QCqyR76QDrZd6Z/IAbeq1DXco/n55TrW1Y4KDV9e0ZfK67tGqwIrwHzyrurgHB61lOj9vIwoZ9GdwW6VuhFXGo6Q8OoLEDX4hCu+9KS5ETNzbqywO1BBuQPaJ87RTnd4LEsN5lVTTYqS2pvg+YGmovZtrqG+sTN1AeQ+9iXDCyNkzOzc/9ofAAEXEKtV9Ik3iDGVQa5PGFHRBBGw/P6/HznqHh8exiX/GxchUHuQJA8fWAEx+yPenL+PjPT+WlMkj+/L2ljEJnyLwyRoKiGzBlB5uZ3ax0kl2EdbojxGuC6AofHvUS111SMlysp82JZ38nXd1E14qXaD9SbzT1WSgD7KK93Z1GoUN1Q5tf27+d9BV8D8TIqzYbTrL6/hY5CTEUna9bmAhmki2SvCeXYtXgsB0bNQqsTZRLmPn46YkR9lLpUAyaXW86IzMrMuPW0wIVsSpuf2LelOiADuJhavb6dI9OkQVMh2KD5ZXxYj4SvHs7NMfOXAx3GaQQYHtBimNIFxLYk6jc2ZAAxmCDpYqQ3Q59/tbq+kFn6mwOJ5U/kgnfyKOAAvIn1Z/8ZyEfRrfIs1L+LzW0IDJjT9pU29cblMQJiPypbYlNeVtZxSvikVD9Lu1XFoGLt0HqaU1wYj9X2Sjm30QsNa1lrDNQ== mikalv@meehnix
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPiPndFPiXs5HWBIkQNnFtbs6TjK6b4L1uqT89yhQF8h Main key for Meeh
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyiv5VAV8k6OSH0FApFLbpo8a1UOwtYjp0D6OiNG5NRQ07Q75KCld1dqHhPcp8z0ngp273TAIHuBYVAgRVfYQ83sM1x/o6WEDJive7c0ckNMxfSSFGnig76IIWSFm10YJ7d00v33IwMsCEX1WQeCfq2bPgORx6FvIRa2RzA6GNULecGWxjikVA7ltH/ijq81jBuUaeR9rC6gLOr0HES/wuWteuH/RMsOvblJrtUEVOh2Qxw4SmC4I1VPgGGbxMLt9nc8f8XxsWNuLRmFQD45Az10SmqcIXHLXykHMwrtgDYYpoB6BAJuxaC6q+IHKpsbu7vOC7rSx9YZXVjzlKQsxF andre@hq01
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMqQ2Cj737dJCqUHhtXbNftNCg3YUlgsNQKlT6y2XJJA andre@rocky
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEhCAaMj+h+Kv74RZ5KnTgZ4rTNCGFMz446AfZRjIpYv andre@HQ01
+
+package_update: true
+package_upgrade: true
+apt:
+  primary:
+    - arches:
+      - amd64
+      uri: "http://apt-cache.sigterm.no:3142/ubuntu"
+
+# Preinstalled packages
+packages:
+  - pwgen
+  - vim
+  - tmux
+  - sharutils
+
+# Install Elixir/Erlang
+runcmd:
+  - wget https://packages.erlang-solutions.com/erlang-solutions_2.0_all.deb
+  - sudo dpkg -i erlang-solutions_2.0_all.deb
+  - apt update
+  - apt install -y esl-erlang
+  - apt install -y elixir
+
+# disable ssh access as root.
+# default: true
+disable_root: true
+
+# resize_rootfs should the / filesytem be resized on first boot
+# this allows you to launch an instance with a larger disk / partition
+# and have the instance automatically grow / to accomoddate it
+# set to 'False' to disable
+# by default, the resizefs is done early in boot, and blocks
+# if resize_rootfs is set to 'noblock', then it will be run in parallel
+resize_rootfs: True
+
+timezone: Europe/Oslo
+# you can set passwords for a user or multiple users
+# this is off by default.
+# password: kake
+chpasswd: { expire: False }
+# in order to enable password login via ssh you must set
+# 'ssh_pwauth'.
+# If it is set, to 'True' or 'False', then sshd_config will be updated
+# to ensure the desired function.  If not set, or set to '' or 'unchanged'
+# then sshd_config will not be updated.
+ssh_pwauth: True
+
+manage_resolv_conf: true
+resolv_conf:
+  nameservers: [193.150.121.6, 193.150.121.7, 193.150.121.15]
+  searchdomains:
+    - sigterm.no
+  domain: sigterm.no
+  options:
+    rotate: true
+    timeout: 1
+
+users:
+  - default
+  - name: sigterm
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC8WuedPAhxZ4Dv3uo8rcQnSBg7QCqyR76QDrZd6Z/IAbeq1DXco/n55TrW1Y4KDV9e0ZfK67tGqwIrwHzyrurgHB61lOj9vIwoZ9GdwW6VuhFXGo6Q8OoLEDX4hCu+9KS5ETNzbqywO1BBuQPaJ87RTnd4LEsN5lVTTYqS2pvg+YGmovZtrqG+sTN1AeQ+9iXDCyNkzOzc/9ofAAEXEKtV9Ik3iDGVQa5PGFHRBBGw/P6/HznqHh8exiX/GxchUHuQJA8fWAEx+yPenL+PjPT+WlMkj+/L2ljEJnyLwyRoKiGzBlB5uZ3ax0kl2EdbojxGuC6AofHvUS111SMlysp82JZ38nXd1E14qXaD9SbzT1WSgD7KK93Z1GoUN1Q5tf27+d9BV8D8TIqzYbTrL6/hY5CTEUna9bmAhmki2SvCeXYtXgsB0bNQqsTZRLmPn46YkR9lLpUAyaXW86IzMrMuPW0wIVsSpuf2LelOiADuJhavb6dI9OkQVMh2KD5ZXxYj4SvHs7NMfOXAx3GaQQYHtBimNIFxLYk6jc2ZAAxmCDpYqQ3Q59/tbq+kFn6mwOJ5U/kgnfyKOAAvIn1Z/8ZyEfRrfIs1L+LzW0IDJjT9pU29cblMQJiPypbYlNeVtZxSvikVD9Lu1XFoGLt0HqaU1wYj9X2Sjm30QsNa1lrDNQ== mikalv@meehnix
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPiPndFPiXs5HWBIkQNnFtbs6TjK6b4L1uqT89yhQF8h Main key for Meeh
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyiv5VAV8k6OSH0FApFLbpo8a1UOwtYjp0D6OiNG5NRQ07Q75KCld1dqHhPcp8z0ngp273TAIHuBYVAgRVfYQ83sM1x/o6WEDJive7c0ckNMxfSSFGnig76IIWSFm10YJ7d00v33IwMsCEX1WQeCfq2bPgORx6FvIRa2RzA6GNULecGWxjikVA7ltH/ijq81jBuUaeR9rC6gLOr0HES/wuWteuH/RMsOvblJrtUEVOh2Qxw4SmC4I1VPgGGbxMLt9nc8f8XxsWNuLRmFQD45Az10SmqcIXHLXykHMwrtgDYYpoB6BAJuxaC6q+IHKpsbu7vOC7rSx9YZXVjzlKQsxF andre@hq01
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMqQ2Cj737dJCqUHhtXbNftNCg3YUlgsNQKlT6y2XJJA andre@rocky
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEhCAaMj+h+Kv74RZ5KnTgZ4rTNCGFMz446AfZRjIpYv andre@HQ01
+  - name: mikalv
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC8WuedPAhxZ4Dv3uo8rcQnSBg7QCqyR76QDrZd6Z/IAbeq1DXco/n55TrW1Y4KDV9e0ZfK67tGqwIrwHzyrurgHB61lOj9vIwoZ9GdwW6VuhFXGo6Q8OoLEDX4hCu+9KS5ETNzbqywO1BBuQPaJ87RTnd4LEsN5lVTTYqS2pvg+YGmovZtrqG+sTN1AeQ+9iXDCyNkzOzc/9ofAAEXEKtV9Ik3iDGVQa5PGFHRBBGw/P6/HznqHh8exiX/GxchUHuQJA8fWAEx+yPenL+PjPT+WlMkj+/L2ljEJnyLwyRoKiGzBlB5uZ3ax0kl2EdbojxGuC6AofHvUS111SMlysp82JZ38nXd1E14qXaD9SbzT1WSgD7KK93Z1GoUN1Q5tf27+d9BV8D8TIqzYbTrL6/hY5CTEUna9bmAhmki2SvCeXYtXgsB0bNQqsTZRLmPn46YkR9lLpUAyaXW86IzMrMuPW0wIVsSpuf2LelOiADuJhavb6dI9OkQVMh2KD5ZXxYj4SvHs7NMfOXAx3GaQQYHtBimNIFxLYk6jc2ZAAxmCDpYqQ3Q59/tbq+kFn6mwOJ5U/kgnfyKOAAvIn1Z/8ZyEfRrfIs1L+LzW0IDJjT9pU29cblMQJiPypbYlNeVtZxSvikVD9Lu1XFoGLt0HqaU1wYj9X2Sjm30QsNa1lrDNQ== mikalv@meehnix
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPiPndFPiXs5HWBIkQNnFtbs6TjK6b4L1uqT89yhQF8h Main key for Meeh
+  - name: andre
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyiv5VAV8k6OSH0FApFLbpo8a1UOwtYjp0D6OiNG5NRQ07Q75KCld1dqHhPcp8z0ngp273TAIHuBYVAgRVfYQ83sM1x/o6WEDJive7c0ckNMxfSSFGnig76IIWSFm10YJ7d00v33IwMsCEX1WQeCfq2bPgORx6FvIRa2RzA6GNULecGWxjikVA7ltH/ijq81jBuUaeR9rC6gLOr0HES/wuWteuH/RMsOvblJrtUEVOh2Qxw4SmC4I1VPgGGbxMLt9nc8f8XxsWNuLRmFQD45Az10SmqcIXHLXykHMwrtgDYYpoB6BAJuxaC6q+IHKpsbu7vOC7rSx9YZXVjzlKQsxF andre@hq01
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMqQ2Cj737dJCqUHhtXbNftNCg3YUlgsNQKlT6y2XJJA andre@rocky
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEhCAaMj+h+Kv74RZ5KnTgZ4rTNCGFMz446AfZRjIpYv andre@HQ01
+
+# TODO: CA certs
+# https://github.com/canonical/cloud-init/blob/master/doc/examples/cloud-config-ca-certs.txt
+
+ca-certs:
+  remove-defaults: false
+  trusted:
