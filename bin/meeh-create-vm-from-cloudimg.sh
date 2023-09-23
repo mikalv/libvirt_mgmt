@@ -9,6 +9,7 @@ ENV_CONFIG=$(realpath $SCRIPT_DIR/../.env)
 export NAME=$1
 export MEMORY=${3:-"${VM_DEFAULT_MEMORY}"}
 export CLOUD_CONFIG_FILE=$2
+export VCPUS=${VM_DEFAULT_VCPUS}
 export ISO_FILE="${VM_DESTDIR}/${NAME}.iso"
 export DISK_FILE="${VM_DESTDIR}/${NAME}.qcow2"
 export NET_BRIDGE=${4:-"${VM_DEFAULT_NET_BRIDGE}"}
@@ -35,6 +36,7 @@ virt-install \
 	--memory $MEMORY \
 	--disk $DISK_FILE,format=qcow2,device=disk,bus=virtio \
 	--disk $ISO_FILE,device=cdrom \
+  --vcpus $VCPUS \
 	--os-type linux \
 	--os-variant ubuntu16.04 \
 	--virt-type kvm \
