@@ -8,7 +8,7 @@ ENV_CONFIG=$(realpath $SCRIPT_DIR/../.env)
 
 export NAME=$1
 export MEMORY=${3:-"${VM_DEFAULT_MEMORY}"}
-export CLOUD_CONFIG_FILE=$2
+export CLOUD_CONFIG_FILE=$(realpath $2)
 export VCPUS=${VM_DEFAULT_VCPUS}
 export ISO_FILE="${VM_DESTDIR}/${NAME}.iso"
 export DISK_FILE="${VM_DESTDIR}/${NAME}.qcow2"
